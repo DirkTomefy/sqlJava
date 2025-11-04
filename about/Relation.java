@@ -113,6 +113,7 @@ public class Relation {
         if (!this.contains(ind))
             this.individus.add(ind);
     }
+   // public static Relation 
 
     public static Relation union(Relation rel1, Relation rel2) throws RelationDomainSizeErr {
         String nvNom = rel1.name + "_Union_" + rel2.name;
