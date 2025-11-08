@@ -152,7 +152,24 @@ public class Tokenizer {
         };
     }
 
-    
+    public static Function<String, ParseResult<Token>> tagString() {
+        return input -> {
+            Function<String, ParseResult<String>> parser = ParserNom.alt(
+                    ParserNom.tagString('"'),
+                    ParserNom.tagString('\''));
+
+            ParseResult<String> result = parser.apply(input);
+
+            if (result instanceof ParseError<String> err) {
+                return new ParseError<>(err.cause());
+            }
+
+            ParseSuccess<String> success = (ParseSuccess<String>) result;
+            return new ParseSuccess<Token>(success.remaining(), new Token(TokenKind.STRING, success.matched()));
+        };
+    }
+
+    // TODO create new function tagString for '' and ""
     public static Function<String, ParseResult<Token>> tagNumber() {
         return input -> {
             Function<String, ParseResult<Double>> numberParser = ParserNom.decimal1();
@@ -242,6 +259,7 @@ public class Tokenizer {
     public static ParseResult<Token> scanToken(String input) {
         input = input.trim();
         Function<String, ParseResult<Token>> parser = ParserNom.alt(
+                tagString(),
                 tagManyKeyWords(),
                 tagId(),
                 tagNumber(),
@@ -259,6 +277,7 @@ public class Tokenizer {
     }
 
     public static void main(String[] args) throws ParseNomException {
-        // System.out.println(tagId().apply("or").unwrap().matched());
+        var t= scanToken("<").unwrap();
+        System.out.println(""+t.matched());
     }
 }

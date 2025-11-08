@@ -16,6 +16,11 @@ public class FactorHelper {
         return new ParseSuccess<>(rest, PrimitiveExpr.number(val));
     }
 
+    public static ParseSuccess<Expression> handleString(Token t, String rest) {
+        String val = (String) t.getValue();
+        return new ParseSuccess<>(rest, PrimitiveExpr.string(val));
+    }
+
     public static ParseSuccess<Expression> handleOther(Token t, String rest, String input) throws ParseNomException {
         Object val = t.getValue();
         if ("(".equals(val)) {

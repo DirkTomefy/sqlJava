@@ -26,30 +26,33 @@ public enum CompareOp implements BinaryOp {
     }
 
     @Override
-    public Object applyByCtx(Individual row, Vector<String> fieldName, Expression left, Expression right) throws EvalErr {
+    public Object applyByCtx(Individual row, Vector<String> fieldName, Expression left, Expression right)
+            throws EvalErr {
         return switch (this) {
             case Is, IsNot -> evalIsComparison(row, fieldName, left, right);
             default -> evalStandardComparison(row, fieldName, left, right);
         };
     }
 
-    private Object evalIsComparison(Individual row, Vector<String> fieldName, Expression left, Expression right) throws EvalErr {
+    private Object evalIsComparison(Individual row, Vector<String> fieldName, Expression left, Expression right)
+            throws EvalErr {
         if (!(right instanceof PrimitiveExpr)) {
             throw new InvalidArgumentErr("IS/IS NOT", "right operand must be a primitive null value");
         }
-        
+
         PrimitiveExpr primitiveRight = (PrimitiveExpr) right;
         if (primitiveRight.type != PrimitiveKind.NULLVALUE) {
             throw new InvalidArgumentErr("IS/IS NOT", "right operand must be a null value");
         }
-        
+
         Object leftValue = left.eval(row, fieldName);
         boolean isNull = (leftValue == null);
 
         return (this == Is) ? isNull : !isNull;
     }
 
-    private Object evalStandardComparison(Individual row, Vector<String> fieldName, Expression left, Expression right) throws EvalErr {
+    private Object evalStandardComparison(Individual row, Vector<String> fieldName, Expression left, Expression right)
+            throws EvalErr {
         Object leftValue = left.eval(row, fieldName);
         Object rightValue = right.eval(row, fieldName);
 
@@ -57,21 +60,43 @@ public enum CompareOp implements BinaryOp {
             return false;
         }
 
-        double leftDouble = toDouble(leftValue);
-        double rightDouble = toDouble(rightValue);
-
         return switch (this) {
-            case Eq -> leftDouble == rightDouble;
-            case Neq -> leftDouble != rightDouble;
-            case Lt -> leftDouble < rightDouble;
-            case Lte -> leftDouble <= rightDouble;
-            case Gt -> leftDouble > rightDouble;
-            case Gte -> leftDouble >= rightDouble;
+            case Eq -> areEqual(leftValue, rightValue);
+            case Neq -> !areEqual(leftValue, rightValue);
+            case Lt, Lte, Gt, Gte -> compareNumbers(leftValue, rightValue);
             default -> throw new InvalidArgumentErr(this.toString(), "comparison not implemented");
         };
     }
 
+    private boolean areEqual(Object left, Object right) {
+        if (left == null && right == null)
+            return true;
+        if (left == null || right == null)
+            return false;
+        if (left.getClass() == right.getClass()) {
+            return left.equals(right);
+        }
+        try {
+            double leftDouble = toDouble(left);
+            double rightDouble = toDouble(right);
+            return leftDouble == rightDouble;
+        } catch (EvalErr e) {
+            return left.toString().equals(right.toString());
+        }
+    }
 
+    private boolean compareNumbers(Object left, Object right) throws EvalErr {
+        double leftDouble = toDouble(left);
+        double rightDouble = toDouble(right);
+
+        return switch (this) {
+            case Lt -> leftDouble < rightDouble;
+            case Lte -> leftDouble <= rightDouble;
+            case Gt -> leftDouble > rightDouble;
+            case Gte -> leftDouble >= rightDouble;
+            default -> false;
+        };
+    }
 
     private double toDouble(Object value) throws EvalErr {
         if (value instanceof Number) {
@@ -80,4 +105,5 @@ public enum CompareOp implements BinaryOp {
         boolean boolValue = Expression.ObjectIntoBoolean(value);
         return Expression.booleanIntoDouble(boolValue);
     }
+
 }

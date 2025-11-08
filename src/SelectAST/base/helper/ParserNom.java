@@ -135,31 +135,29 @@ public class ParserNom {
         return ParserNom0.combineFirstAndRestForTag((ParseSuccess<String>) firstRes, (ParseSuccess<String>) restRes);
     }
 
-    public static Function<String, ParseResult<String>> quote() {
-        return tag("\"");
-    }
+    public static Function<String, ParseResult<String>> tagString(char separator) {
+        return input -> {
+            ParseResult<String> openQuote = tag("" + separator).apply(input);
+            if (openQuote instanceof ParseError<String> e)
+                return e;
 
-    public static ParseResult<String> tagStringTwo(String input) {
-        ParseResult<String> openQuote = quote().apply(input);
-        if (openQuote instanceof ParseError<String> e)
-            return e;
+            String remaining = ((ParseSuccess<String>) openQuote).remaining();
 
-        String remaining = ((ParseSuccess<String>) openQuote).remaining();
+            ParseResult<String> contentRes = takeWhile1(c -> c != separator, remaining);
+            if (contentRes instanceof ParseError<String> e)
+                return e;
 
-        ParseResult<String> contentRes = takeWhile1(c -> c != '"', remaining);
-        if (contentRes instanceof ParseError<String> e)
-            return e;
+            remaining = ((ParseSuccess<String>) contentRes).remaining();
+            String content = ((ParseSuccess<String>) contentRes).matched();
 
-        remaining = ((ParseSuccess<String>) contentRes).remaining();
-        String content = ((ParseSuccess<String>) contentRes).matched();
+            ParseResult<String> closeQuote = tag("" + separator).apply(remaining);
+            if (closeQuote instanceof ParseError<String> e)
+                return e;
 
-        ParseResult<String> closeQuote = quote().apply(remaining);
-        if (closeQuote instanceof ParseError<String> e)
-            return e;
+            remaining = ((ParseSuccess<String>) closeQuote).remaining();
 
-        remaining = ((ParseSuccess<String>) closeQuote).remaining();
-
-        return new ParseSuccess<>(remaining, content);
+            return new ParseSuccess<>(remaining, content);
+        };
     }
 
     @SafeVarargs

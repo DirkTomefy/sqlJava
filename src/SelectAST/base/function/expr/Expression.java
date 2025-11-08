@@ -162,6 +162,9 @@ public interface Expression {
             case NULLVALUE -> {
                 yield new ParseSuccess<>(rest, new PrimitiveExpr(PrimitiveKind.NULLVALUE, null));
             }
+            case STRING -> {
+                yield  FactorHelper.handleString(t, rest);
+            }
             default -> throw ParseNomException.buildTokenWrongPlace(t, input);
         };
     }

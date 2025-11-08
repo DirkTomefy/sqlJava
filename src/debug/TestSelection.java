@@ -66,36 +66,41 @@ public class TestSelection {
             }
 
             // Test 1: Sélection par âge
-            System.out.println("\n1. Sélection age > 28:");
-            Relation result1 = relation.selection("age > 28");
+            String select1= "age > 28";
+            System.out.println("\n1. Sélection "+select1);
+            Relation result1 = relation.selection(select1);
             System.out.println("Résultat: " + result1.getIndividus().size() + " individus");
             for (Individual ind : result1.getIndividus()) {
                 System.out.println("  " + ind.getValues());
             }
 
             // Test 2: Sélection par ville
-            System.out.println("\n2. Sélection ville = 'Paris':");
-            Relation result2 = relation.selection("ville = \"Paris\"");
+            String select2="ville = 'Paris'";
+            System.out.println("\n2. Sélection "+select2);
+            Relation result2 = relation.selection(select2);
             System.out.println("Résultat: " + result2.getIndividus().size() + " individus");
             for (Individual ind : result2.getIndividus()) {
                 System.out.println("  " + ind.getValues());
             }
 
             // Test 3: Sélection combinée
-            System.out.println("\n3. Sélection age <= 30 AND ville != 'Paris':");
-            Relation result3 = relation.selection("age <= 30 AND ville != 'Paris'");
+            String select3="(age < 30 AND ville != 'Paris') and ((1+1=2) or 1!=1)";
+            System.out.println("\n3. Sélection "+select3);
+            Relation result3 = relation.selection(select3);
             System.out.println("Résultat: " + result3.getIndividus().size() + " individus");
             for (Individual ind : result3.getIndividus()) {
                 System.out.println("  " + ind.getValues());
             }
 
             // Test 4: Sélection avec condition toujours vraie
-            System.out.println("\n4. Sélection 1 = 1 (tous les individus):");
-            Relation result4 = relation.selection("1 = 1");
+            String select4="1 = 1";
+            System.out.println("\n4. Sélection "+select4);
+            Relation result4 = relation.selection(select4);
             System.out.println("Résultat: " + result4.getIndividus().size() + " individus");
 
             // Test 5: Sélection avec condition toujours fausse
-            System.out.println("\n5. Sélection 1 = 0 (aucun individu):");
+            String select5="1 = 0";
+            System.out.println("\n5. Sélection "+select5);
             Relation result5 = relation.selection("1 = 0");
             System.out.println("Résultat: " + result5.getIndividus().size() + " individus");
 

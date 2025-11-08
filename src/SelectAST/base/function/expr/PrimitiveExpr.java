@@ -30,6 +30,10 @@ public class PrimitiveExpr implements Expression {
         return new PrimitiveExpr(PrimitiveKind.ID, valueString);
     }
 
+    public static PrimitiveExpr string(String valueString) {
+        return new PrimitiveExpr(PrimitiveKind.STRING, valueString);
+    }
+
     @Override
     public String toString() {
         return type.toString() + "(" + value + ")";

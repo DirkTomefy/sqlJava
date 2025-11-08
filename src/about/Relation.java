@@ -204,7 +204,7 @@ public class Relation {
 
    public Relation selection(String condition) throws ParseNomException, EvalErr {
     Expression expr = Expression.level0.apply(condition).unwrap().matched();
-    
+   // System.out.println(""+expr);
     String newName = this.name + "_selection";
     Vector<Individual> selectedIndividuals = new Vector<>();
     Relation result = new Relation(newName, this.fieldName, this.domaines, selectedIndividuals);
