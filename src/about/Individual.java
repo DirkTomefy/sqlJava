@@ -52,4 +52,10 @@ public class Individual {
           return true;
      }
 
+     public Object get(int index) {
+         return this.values.get(index);
+     }
+
+    
+
 }

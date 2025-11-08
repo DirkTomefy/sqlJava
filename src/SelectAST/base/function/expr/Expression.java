@@ -1,5 +1,6 @@
 package SelectAST.base.function.expr;
 
+import java.util.Vector;
 import java.util.function.Function;
 
 import SelectAST.base.function.expr.helper.FactorHelper;
@@ -10,12 +11,45 @@ import SelectAST.base.function.operand.other.LogicalOp;
 import SelectAST.base.function.result.ParseError;
 import SelectAST.base.function.result.ParseResult;
 import SelectAST.base.function.result.ParseSuccess;
+import SelectAST.err.EvalErr;
 import SelectAST.err.ParseNomException;
 import SelectAST.token.Token;
 import SelectAST.token.TokenKind;
 import SelectAST.token.Tokenizer;
+import about.Individual;
 
 public interface Expression {
+
+    public abstract Object eval(Individual row, Vector<String> fieldName) throws EvalErr;
+
+    public default boolean evalToBoolean(Individual row, Vector<String> fieldName) throws EvalErr{
+        return ObjectIntoBoolean(eval(row, fieldName));
+    }
+
+    public static boolean ObjectIntoBoolean(Object e) {
+        if (e == null) {
+            return false;
+        }
+
+        if (e instanceof Boolean) {
+            return (Boolean) e;
+        }
+
+        if (e instanceof Number) {
+            return ((Number) e).doubleValue() != 0.0;
+        }
+
+        if (e instanceof String) {
+            String str = ((String) e).trim().toLowerCase();
+            return str.equals("true") || str.equals("1") || str.equals("yes") ||
+                    str.equals("on") || str.equals("t") || str.equals("y");
+        }
+        return true;
+    }
+
+    public static double booleanIntoDouble(boolean b) {
+        return b ? 1.0 : 0.0;
+    }
 
     public static final Function<String, ParseResult<Expression>> level0 = Expression::parseLogical;
 
@@ -141,8 +175,6 @@ public interface Expression {
             }
         };
     }
-
-    public abstract Double eval();
 
     public static void main(String[] args) throws ParseNomException {
         String input = "1 is not 1";

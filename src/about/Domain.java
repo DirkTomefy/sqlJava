@@ -5,7 +5,7 @@ import java.util.Vector;
 
 public class Domain {
     HashSet<DomainAtom> supports;
-    HashSet<Object> allowedValue;
+
     public Domain() {
         this.supports=new HashSet<>();
     }   
@@ -17,21 +17,15 @@ public class Domain {
     public void append(DomainAtom values) {
         this.supports.add(values);
     }
-    public Domain toNolimit(){
-        HashSet<DomainAtom> nolimit=new HashSet<>();
-        for (DomainAtom object : supports) {
-            nolimit.add(object.toNolimit());
-        }
-        return new Domain(nolimit);
-    }
-    public HashSet<DomainAtom> toNoListlimit(){
-        HashSet<DomainAtom> nolimit=new HashSet<>();
-        for (DomainAtom object : supports) {
-            nolimit.add(object.toNolimit());
-        }
-        return nolimit;
-    }
+
     public static Domain createNewDomain(Domain d1, Domain d2) {
+        if (d1 == null && d2 == null)
+            return new Domain();
+        if (d1 == null)
+            return new Domain(d2.supports);
+        if (d2 == null)
+            return new Domain(d1.supports);
+
         HashSet<DomainAtom> newSupports = new HashSet<>();
         newSupports.addAll(d1.supports);
         newSupports.addAll(d2.supports);
@@ -63,16 +57,8 @@ public class Domain {
     public boolean isSupportable(Object a) {
         boolean value = false;
         for (DomainAtom domainAtom : supports) {
-            if (domainAtom.isSupportable(a)) 
-            {
-                if(allowedValue!=null){
-                    if(allowedValue.contains(a)){
-                        return true;
-                    }
-                }else{
-                    return true;
-                }
-            }
+            if (domainAtom.isSupportable(a))
+                return true;
         }
         return value;
     }
@@ -99,20 +85,20 @@ public class Domain {
                 }
                 
                 // Valeurs autorisées si présentes
-                // if (atom.getAllowedValue() != null && !atom.getAllowedValue().isEmpty()) {
-                //     sb.append("[");
-                //     int valueCount = 0;
-                //     for (Object value : atom.getAllowedValue() ) {
-                //         if (valueCount > 0) sb.append(",");
-                //         sb.append(value);
-                //         valueCount++;
-                //         if (valueCount >= 3) { // Limite l'affichage à 3 valeurs
-                //             sb.append(",...");
-                //             break;
-                //         }
-                //     }
-                //     sb.append("]");
-                // }
+                if (atom.getAllowedValue() != null && !atom.getAllowedValue().isEmpty()) {
+                    sb.append("[");
+                    int valueCount = 0;
+                    for (Object value : atom.getAllowedValue() ) {
+                        if (valueCount > 0) sb.append(",");
+                        sb.append(value);
+                        valueCount++;
+                        if (valueCount >= 3) { // Limite l'affichage à 3 valeurs
+                            sb.append(",...");
+                            break;
+                        }
+                    }
+                    sb.append("]");
+                }
             } else {
                 sb.append("NULL");
             }

@@ -1,6 +1,10 @@
 package SelectAST.base.function.expr;
 
+import java.util.Vector;
+
 import SelectAST.base.function.operand.BinaryOp;
+import SelectAST.err.EvalErr;
+import about.Individual;
 
 public class BinaryExpr implements Expression {
     private final Expression left;
@@ -13,14 +17,17 @@ public class BinaryExpr implements Expression {
         this.right = right;
     }
 
-    @Override
-    public Double eval() {
-        return op.evalBySelf(left,right);
-       
-    }
+    
 
     @Override
     public String toString() {
         return "(" + left + " " + op + " " + right + ")";
+    }
+
+
+
+    @Override
+    public Object eval(Individual row, Vector<String> fieldName) throws EvalErr {
+        return this.op.applyByCtx(row, fieldName, left, right);
     }
 }

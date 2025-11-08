@@ -1,6 +1,9 @@
 package SelectAST.base.function.expr;
 
+import java.util.Vector;
+
 import SelectAST.base.function.operand.PrefixedOp;
+import about.Individual;
 
 public class PrefixedExpr implements Expression {
     private PrefixedOp op;
@@ -11,11 +14,7 @@ public class PrefixedExpr implements Expression {
         this.expr = expr;
     }
 
-    @Override
-    public Double eval() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'eval'");
-    }
+  
 
     @Override
     public String toString() {
@@ -36,6 +35,14 @@ public class PrefixedExpr implements Expression {
 
     public void setExpr(Expression expr) {
         this.expr = expr;
+    }
+
+
+
+    @Override
+    public Object eval(Individual row, Vector<String> fieldName) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'eval'");
     }
 
 }

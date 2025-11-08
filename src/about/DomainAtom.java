@@ -1,7 +1,11 @@
 package about;
+
+import java.util.HashSet;
+import java.util.Set;
+
 public class DomainAtom {
     private Class<?> def;
-   
+    private Set<Object> allowedValue;
     private Integer limit;
 
     // constructors
@@ -9,12 +13,11 @@ public class DomainAtom {
         this.def = def;
     }
 
-    public DomainAtom(Class<?> def, Integer limit) {
+    public DomainAtom(Class<?> def, Set<Object> allowedValue, Integer limit) {
         this.def = def;
-
+        this.allowedValue = allowedValue;
         this.limit = limit;
     }
-
 
     // getters and setters
     public Class<?> getDef() {
@@ -25,12 +28,27 @@ public class DomainAtom {
         this.def = def;
     }
 
+    public Set<?> getAllowedValue() {
+        return allowedValue;
+    }
+
     public Integer getLimit() {
         return limit;
     }
 
-  
-    public boolean isSupportable(Object value) {        
+    public void appendAllowedValue(Object value) {
+        if (this.allowedValue == null)
+            this.allowedValue = new HashSet<>();
+        allowedValue.add(value);
+    }
+
+    public boolean isSupportable(Object value) {
+        if (allowedValue != null && !allowedValue.isEmpty()) {
+            if (!allowedValue.contains(value)) {
+                return false;
+            }
+        }
+
         if (limit != null && value instanceof String) {
             String str = (String) value;
             if (str.length() > limit) {
@@ -56,16 +74,13 @@ public class DomainAtom {
             return false;
         } else {
             DomainAtom da = (DomainAtom) value;
-            if (this.def.equals(da.def)) {
+            if (this.allowedValue.equals(da.allowedValue) &&
+                    this.def.equals(da.def)) {
                 return true;
             } else {
                 return false;
             }
         }
 
-    }
-
-    public DomainAtom toNolimit(){
-        return new DomainAtom(def , null);
     }
 }
