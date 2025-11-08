@@ -4,6 +4,8 @@ import java.util.Vector;
 
 import SelectAST.base.function.expr.Expression;
 import SelectAST.base.function.operand.BinaryOp;
+import SelectAST.err.EvalErr;
+import SelectAST.err.eval.DivisionByZeroErr;
 import about.Individual;
 
 public enum ArithmeticOp implements BinaryOp {
@@ -13,14 +15,45 @@ public enum ArithmeticOp implements BinaryOp {
     DIV;
 
     @Override
-    public boolean applyByBool(boolean left, boolean right) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'applyByBool'");
+    public Object applyByCtx(Individual row, Vector<String> fieldName, Expression left, Expression right)
+            throws EvalErr {
+        Object leftValue = left.eval(row, fieldName);
+        Object rightValue = right.eval(row, fieldName);
+
+        double leftDouble = toDouble(leftValue);
+        double rightDouble = toDouble(rightValue);
+
+        return applyOperation(leftDouble, rightDouble);
     }
 
-    @Override
-    public Object applyByCtx(Individual row, Vector<String> fieldName, Expression left, Expression right) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'applyByCtx'");
+    private double toDouble(Object value) throws EvalErr {
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        return Expression.booleanIntoDouble(Expression.ObjectIntoBoolean(value));
     }
+
+    private double applyOperation(double left, double right) throws EvalErr {
+        return switch (this) {
+            case ADD -> left + right;
+            case MIN -> left - right;
+            case MUL -> left * right;
+            case DIV -> {
+                if (right == 0.0) {
+                    throw new DivisionByZeroErr(left);
+                }
+                yield left / right;
+            }
+        };
+    }           
 }
+    
+
+        
+
+
+        
+
+
+        
+
