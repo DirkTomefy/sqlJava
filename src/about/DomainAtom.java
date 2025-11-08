@@ -1,11 +1,7 @@
 package about;
-
-import java.util.HashSet;
-import java.util.Set;
-
 public class DomainAtom {
     private Class<?> def;
-    // private Set<Object> allowedValue;
+   
     private Integer limit;
 
     // constructors

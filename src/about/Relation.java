@@ -199,6 +199,12 @@ public class Relation {
         return new Relation(nv_nom, fieldName, newDomaines, newIndividus);
     }
 
+    // public Relation projection(String...fields){
+    //     for(){
+
+    //     }
+    //     return null;
+    // }
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

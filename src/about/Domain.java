@@ -31,15 +31,7 @@ public class Domain {
         }
         return nolimit;
     }
-    public static Domain createNewDomain(Domain d1, Dw
-    ain d2) {
-        if (d1 == null && d2 == null)
-            return new Domain();
-        if (d1 == null)
-            return new Domain(d2.supports);
-        if (d2 == null)
-            return new Domain(d1.supports);
-
+    public static Domain createNewDomain(Domain d1, Domain d2) {
         HashSet<DomainAtom> newSupports = new HashSet<>();
         newSupports.addAll(d1.supports);
         newSupports.addAll(d2.supports);
