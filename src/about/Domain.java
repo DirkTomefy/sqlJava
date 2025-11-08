@@ -76,29 +76,7 @@ public class Domain {
             if (count > 0) sb.append(", ");
             
             if (atom != null) {
-                // Type principal
-                sb.append(atom.getDef().getSimpleName());
-                
-                // Limite si présente
-                if (atom.getLimit() != null) {
-                    sb.append("(").append(atom.getLimit()).append(")");
-                }
-                
-                // Valeurs autorisées si présentes
-                if (atom.getAllowedValue() != null && !atom.getAllowedValue().isEmpty()) {
-                    sb.append("[");
-                    int valueCount = 0;
-                    for (Object value : atom.getAllowedValue() ) {
-                        if (valueCount > 0) sb.append(",");
-                        sb.append(value);
-                        valueCount++;
-                        if (valueCount >= 3) { // Limite l'affichage à 3 valeurs
-                            sb.append(",...");
-                            break;
-                        }
-                    }
-                    sb.append("]");
-                }
+                sb.append(""+atom.toString());
             } else {
                 sb.append("NULL");
             }
