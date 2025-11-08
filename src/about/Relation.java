@@ -3,6 +3,9 @@ package about;
 import java.sql.Date;
 import java.util.Vector;
 
+import SelectAST.base.function.expr.Expression;
+import SelectAST.err.EvalErr;
+import SelectAST.err.ParseNomException;
 import err.DomainOutOfBonds;
 import err.DomainSupportErr;
 import err.RelationDomainSizeErr;
@@ -199,12 +202,24 @@ public class Relation {
         return new Relation(nv_nom, fieldName, newDomaines, newIndividus);
     }
 
-    // public Relation projection(String...fields){
-    //     for(){
-
-    //     }
-    //     return null;
-    // }
+   public Relation selection(String condition) throws ParseNomException, EvalErr {
+    Expression expr = Expression.level0.apply(condition).unwrap().matched();
+    
+    String newName = this.name + "_selection";
+    Vector<Individual> selectedIndividuals = new Vector<>();
+    Relation result = new Relation(newName, this.fieldName, this.domaines, selectedIndividuals);
+    
+    for (Individual individual : this.individus) {
+            Object resultEval = expr.eval(individual, this.fieldName);
+            boolean conditionMet = Expression.ObjectIntoBoolean(resultEval);
+            
+            if (conditionMet) {
+                result.appendIfNotExist(individual);
+            }
+    }
+    
+    return result;
+}
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

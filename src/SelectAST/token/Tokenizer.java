@@ -152,6 +152,7 @@ public class Tokenizer {
         };
     }
 
+    
     public static Function<String, ParseResult<Token>> tagNumber() {
         return input -> {
             Function<String, ParseResult<Double>> numberParser = ParserNom.decimal1();
