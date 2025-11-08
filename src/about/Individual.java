@@ -56,6 +56,10 @@ public class Individual {
          return this.values.get(index);
      }
 
+     public void setValues(Vector<Object> values) {
+          this.values = values;
+     }
+
     
 
 }
