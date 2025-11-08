@@ -18,6 +18,7 @@ public class Individual {
     }
 
      public Individual() {
+          this.values=new Vector<>();
      }
 
      public Individual(Vector<Object> values) {

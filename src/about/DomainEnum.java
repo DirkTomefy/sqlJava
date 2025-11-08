@@ -13,4 +13,34 @@ public class DomainEnum implements DomainAtom {
     public boolean isSupportable(Object value) {
         return this.allowedValue.contains(value);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("DomainEnum{");
+        sb.append("allowedValues=[");
+        
+        if (allowedValue != null && !allowedValue.isEmpty()) {
+            int count = 0;
+            for (Object value : allowedValue) {
+                if (count > 0) {
+                    sb.append(", ");
+                }
+                sb.append(value.toString());
+                count++;
+                // Limiter l'affichage pour éviter des toString trop longs
+                if (count >= 10) {
+                    sb.append(", ...");
+                    break;
+                }
+            }
+        } else {
+            sb.append("empty");
+        }
+        
+        sb.append("], size=").append(allowedValue != null ? allowedValue.size() : 0);
+        sb.append("}");
+        
+        return sb.toString();
+    }
 }

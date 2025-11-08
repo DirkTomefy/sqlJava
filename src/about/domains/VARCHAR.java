@@ -5,8 +5,15 @@ import about.DomainAtom;
 public class VARCHAR implements DomainAtom {
     Integer limit;
 
+    public void setLimit(Integer limit) {
+        this.limit = limit;
+    }
+
+
     @Override
     public boolean isSupportable(Object value) {
+        
+        if(value==null) return false;
         if (value instanceof String s) {
             if (limit == null) {
                 return true;
@@ -18,4 +25,9 @@ public class VARCHAR implements DomainAtom {
         }
     }
 
+
+    @Override
+    public String toString(){
+        return "VARCHAR( "+limit+" )";
+    }
 }

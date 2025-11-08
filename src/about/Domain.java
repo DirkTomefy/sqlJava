@@ -86,5 +86,9 @@ public class Domain {
         
         return sb.toString();
     }
+
+    public HashSet<DomainAtom> getSupports() {
+        return supports;
+    }
     
 }

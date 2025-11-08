@@ -8,6 +8,8 @@ public class NUMBER implements DomainAtom {
     
     @Override
     public boolean isSupportable(Object value) {
+        
+        if(value==null) return false;
         if(value instanceof Number n){
             if (min == null && max == null) {
                 return true;
@@ -21,5 +23,26 @@ public class NUMBER implements DomainAtom {
         } else {
             return false;
         }
+    }
+
+    public Number getMin() {
+        return min;
+    }
+
+    public void setMin(Number min) {
+        this.min = min;
+    }
+
+    public Number getMax() {
+        return max;
+    }
+
+    public void setMax(Number max) {
+        this.max = max;
+    }
+
+    @Override
+    public String toString(){
+        return "NUMBER(min:"+min+","+"max:"+max+")";
     }
 }

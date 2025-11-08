@@ -6,6 +6,8 @@ import java.util.Vector;
 import SelectAST.base.function.expr.Expression;
 import SelectAST.err.EvalErr;
 import SelectAST.err.ParseNomException;
+import SelectAST.err.eval.FieldNotFoundErr;
+import about.util.ProjectionHelper;
 import err.DomainOutOfBonds;
 import err.DomainSupportErr;
 import err.RelationDomainSizeErr;
@@ -17,7 +19,6 @@ public class Relation {
     Vector<String> fieldName;
     Vector<Domain> domaines = new Vector<>();
     Vector<Individual> individus = new Vector<>();
-
 
     public Vector<String> getFieldName() {
         return fieldName;
@@ -35,7 +36,6 @@ public class Relation {
         this.name = name;
     }
 
-
     public Vector<Domain> getDomaines() {
         return domaines;
     }
@@ -43,7 +43,6 @@ public class Relation {
     public void setDomaines(Vector<Domain> domaines) {
         this.domaines = domaines;
     }
-
 
     public Vector<Individual> getIndividus() {
         return individus;
@@ -54,6 +53,9 @@ public class Relation {
     }
 
     public Relation() {
+        this.domaines=new Vector<>();
+        this.fieldName=new Vector<>();
+        this.individus=new Vector<>();
     }
 
     public Relation(String name, Vector<String> fieldName, Vector<Domain> domaines, Vector<Individual> individus) {
@@ -80,7 +82,6 @@ public class Relation {
         if (ind.values.size() != this.domaines.size())
             throw new DomainOutOfBonds(ind, this);
         for (int i = 0; i < ind.values.size(); i++) {
-            System.out.println(""+ind.getValues().get(i).getClass());
             if (!domaines.get(i).isSupportable(ind.getValues().get(i))) {
                 throw new DomainSupportErr(ind, this.domaines.get(i), i);
             }
@@ -116,7 +117,7 @@ public class Relation {
         if (!this.contains(ind))
             this.individus.add(ind);
     }
-   // public static Relation 
+    // public static Relation
 
     public static Relation union(Relation rel1, Relation rel2) throws RelationDomainSizeErr {
         String nvNom = rel1.name + "_Union_" + rel2.name;
@@ -202,24 +203,29 @@ public class Relation {
         return new Relation(nv_nom, fieldName, newDomaines, newIndividus);
     }
 
-   public Relation selection(String condition) throws ParseNomException, EvalErr {
-    Expression expr = Expression.level0.apply(condition).unwrap().matched();
-   // System.out.println(""+expr);
-    String newName = this.name + "_selection";
-    Vector<Individual> selectedIndividuals = new Vector<>();
-    Relation result = new Relation(newName, this.fieldName, this.domaines, selectedIndividuals);
-    
-    for (Individual individual : this.individus) {
+    public Relation projection(String[] fields) throws FieldNotFoundErr {
+        ProjectionHelper helper = new ProjectionHelper();
+        return helper.executeProjection(this, fields);
+    }
+
+    public Relation selection(String condition) throws ParseNomException, EvalErr {
+        Expression expr = Expression.level0.apply(condition).unwrap().matched();
+        String newName = this.name + "_selection";
+        Vector<Individual> selectedIndividuals = new Vector<>();
+        Relation result = new Relation(newName, this.fieldName, this.domaines, selectedIndividuals);
+
+        for (Individual individual : this.individus) {
             Object resultEval = expr.eval(individual, this.fieldName);
             boolean conditionMet = Expression.ObjectIntoBoolean(resultEval);
-            
+
             if (conditionMet) {
                 result.appendIfNotExist(individual);
             }
+        }
+
+        return result;
     }
-    
-    return result;
-}
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -234,7 +240,7 @@ public class Relation {
             for (int i = 0; i < fieldName.size(); i++) {
                 String field = fieldName.get(i);
                 String domainInfo = (domaines != null && i < domaines.size())
-                        ? " (" + getDomainType(domaines.get(i)) + ")"
+                        ? " (" + domaines.get(i) + ")"
                         : "";
                 sb.append(field).append(domainInfo).append(" | ");
             }
@@ -268,9 +274,6 @@ public class Relation {
         return sb.toString();
     }
 
-    private String getDomainType(Domain domain) {
-       return domain.toString();
-    }
 
     private String formatValue(Object value) {
         if (value == null) {
