@@ -2,14 +2,23 @@ package about.domains;
 
 import about.DomainAtom;
 
-public class NUMBER implements DomainAtom {
+public class NUMBER extends DomainAtom {
+    
     Number min;
     Number max;
     
+    public NUMBER(){
+
+    }
+
+    public NUMBER(boolean canBenull,Number min,Number max){
+        this.setCanBenull(canBenull);
+        this.min=min;
+        this.max=max;
+    }
+
     @Override
     public boolean isSupportable(Object value) {
-        
-        if(value==null) return false;
         if(value instanceof Number n){
             if (min == null && max == null) {
                 return true;
@@ -45,4 +54,5 @@ public class NUMBER implements DomainAtom {
     public String toString(){
         return "NUMBER(min:"+min+","+"max:"+max+")";
     }
+
 }

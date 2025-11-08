@@ -2,8 +2,12 @@ package about;
 
 import java.util.HashSet;
 
-public class DomainEnum implements DomainAtom {
+public class DomainEnum extends DomainAtom {
     HashSet<Object> allowedValue;
+
+    public DomainEnum(boolean canBenull, HashSet<Object> allowedValue) {
+        this.allowedValue = allowedValue;
+    }
 
     public DomainEnum(HashSet<Object> allowedValue) {
         this.allowedValue = allowedValue;
@@ -28,7 +32,6 @@ public class DomainEnum implements DomainAtom {
                 }
                 sb.append(value.toString());
                 count++;
-                // Limiter l'affichage pour éviter des toString trop longs
                 if (count >= 10) {
                     sb.append(", ...");
                     break;

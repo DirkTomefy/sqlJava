@@ -1,6 +1,11 @@
 package about;
 
 
-public interface DomainAtom {
-    boolean isSupportable(Object value);
+public abstract class DomainAtom {
+
+    boolean canBenull=false;
+    public abstract boolean isSupportable(Object value);
+    public void setCanBenull(boolean canBenull) {
+        this.canBenull = canBenull;
+    }
 }

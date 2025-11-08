@@ -2,13 +2,21 @@ package about.domains;
 
 import about.DomainAtom;
 
-public class VARCHAR implements DomainAtom {
+public class VARCHAR extends DomainAtom {
     Integer limit;
 
     public void setLimit(Integer limit) {
         this.limit = limit;
     }
 
+    public VARCHAR(){
+
+    }
+
+    public VARCHAR(boolean canBenull,Integer limit){
+        this.setCanBenull(canBenull);
+        this.setLimit(limit);
+    }
 
     @Override
     public boolean isSupportable(Object value) {
