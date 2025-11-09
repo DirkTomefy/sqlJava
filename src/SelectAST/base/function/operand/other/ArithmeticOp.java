@@ -4,6 +4,9 @@ import java.util.Vector;
 
 import SelectAST.base.function.expr.Expression;
 import SelectAST.base.function.operand.BinaryOp;
+import SelectAST.base.function.result.ParseResult;
+import SelectAST.base.function.result.ParseSuccess;
+import SelectAST.base.helper.ParserNom;
 import SelectAST.err.EvalErr;
 import SelectAST.err.eval.DivisionByZeroErr;
 import about.Individual;
@@ -26,10 +29,17 @@ public enum ArithmeticOp implements BinaryOp {
         return applyOperation(leftDouble, rightDouble);
     }
 
-    private double toDouble(Object value) throws EvalErr {
+    private static double toDouble(Object value)  {
         if (value instanceof Number) {
             return ((Number) value).doubleValue();
+        }else if (value instanceof String s){
+            ParseResult<Double> a=ParserNom.decimal1().apply(s);
+            if(a instanceof ParseSuccess<Double> success) return success.matched();
         }
+        return makedefaultToDouble(value);
+    }
+
+    private static double makedefaultToDouble(Object value) {
         return Expression.booleanIntoDouble(Expression.ObjectIntoBoolean(value));
     }
 
@@ -45,15 +55,5 @@ public enum ArithmeticOp implements BinaryOp {
                 yield left / right;
             }
         };
-    }           
+    }
 }
-    
-
-        
-
-
-        
-
-
-        
-
