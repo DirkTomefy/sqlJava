@@ -3,6 +3,7 @@ package SelectAST.base.function.expr;
 import java.util.Vector;
 
 import SelectAST.err.EvalErr;
+import SelectAST.err.eval.AmbigousNameErr;
 import SelectAST.err.eval.FieldNotFoundErr;
 import SelectAST.err.eval.InvalidArgumentErr;
 import SelectAST.err.eval.NullValueErr;
@@ -50,6 +51,7 @@ public class PrimitiveExpr implements Expression {
     }
 
     private Object evalId(Individual row, Vector<String> fieldName) throws EvalErr {
+      
         if (fieldName == null || fieldName.isEmpty()) {
             throw new InvalidArgumentErr("ID", "field names cannot be null or empty");
         }
@@ -60,6 +62,9 @@ public class PrimitiveExpr implements Expression {
 
         String idFieldName = (String) value;
         int index = fieldName.indexOf(idFieldName);
+
+        if(fieldName.lastIndexOf(idFieldName)!=fieldName.indexOf(idFieldName)) throw new AmbigousNameErr(idFieldName);
+        
         if (index == -1) {
             throw new FieldNotFoundErr(idFieldName, fieldName);
         }
