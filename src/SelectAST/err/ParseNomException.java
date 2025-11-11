@@ -37,4 +37,8 @@ public class ParseNomException extends Exception {
     public static ParseNomException buildParensMissing(Token token,String input){
         return new ParseNomException(input,"Parense missing : / Token wrong place : "+token.toString());
     }
+
+    public static ParseNomException buildRemainingException(String remaining){
+        return new ParseNomException(remaining, "Can not eval because the input contains some remaining='"+remaining+"'");
+    }
 }

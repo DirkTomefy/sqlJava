@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.util.Vector;
 
 import SelectAST.base.function.expr.Expression;
+import SelectAST.base.function.result.ParseSuccess;
 import SelectAST.err.EvalErr;
 import SelectAST.err.ParseNomException;
 import SelectAST.err.eval.FieldNotFoundErr;
@@ -213,7 +214,10 @@ public class Relation {
     }
 
     public Relation selection(String condition) throws ParseNomException, EvalErr {
-        Expression expr = Expression.level0.apply(condition).unwrap().matched();
+        ParseSuccess<Expression> exprSuccess = Expression.parseExpression.apply(condition).unwrap();
+        if(!exprSuccess.remaining().trim().isEmpty()) throw ParseNomException.buildRemainingException(exprSuccess.remaining());
+        
+        Expression expr=exprSuccess.matched();
         String newName = this.name + "_selection";
         Vector<Individual> selectedIndividuals = new Vector<>();
         Relation result = new Relation(newName, this.fieldName, this.domaines, selectedIndividuals);

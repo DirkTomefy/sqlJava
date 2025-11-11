@@ -24,7 +24,7 @@ public class FactorHelper {
     public static ParseSuccess<Expression> handleOther(Token t, String rest, String input) throws ParseNomException {
         Object val = t.getValue();
         if ("(".equals(val)) {
-            ParseSuccess<Expression> exp = Expression.level0.apply(rest).unwrap();
+            ParseSuccess<Expression> exp = Expression.parseExpression.apply(rest).unwrap();
             ParseSuccess<Token> next = Tokenizer.scanToken(exp.remaining()).unwrap();
 
             if (")".equals(next.matched().getValue())) {

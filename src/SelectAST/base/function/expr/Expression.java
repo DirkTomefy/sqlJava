@@ -19,30 +19,41 @@ import SelectAST.token.Tokenizer;
 import about.Individual;
 
 public interface Expression {
+    public static final Function<String, ParseResult<Expression>> parseExpression = input -> {
+        try {
+            return parseExprLevel(0, input);
+
+        } catch (ParseNomException e) {
+            return new ParseError<>(e);
+        }
+    };
+    static final BinaryOp[][] LEVELS = {
+            { LogicalOp.OR, LogicalOp.AND },
+            CompareOp.allCompareOp(),
+            { ArithmeticOp.ADD, ArithmeticOp.MIN },
+            { ArithmeticOp.MUL, ArithmeticOp.DIV }
+    };
+
+    
+
 
     public abstract Object eval(Individual row, Vector<String> fieldName) throws EvalErr;
 
-    public default boolean evalToBoolean(Individual row, Vector<String> fieldName) throws EvalErr{
+    public default boolean evalToBoolean(Individual row, Vector<String> fieldName) throws EvalErr {
         return ObjectIntoBoolean(eval(row, fieldName));
     }
 
     public static boolean ObjectIntoBoolean(Object e) {
-        if (e == null) {
+        if (e == null)
             return false;
-        }
-
-        if (e instanceof Boolean) {
-            return (Boolean) e;
-        }
-
-        if (e instanceof Number) {
-            return ((Number) e).doubleValue() != 0.0;
-        }
-
-        if (e instanceof String) {
-            String str = ((String) e).trim().toLowerCase();
-            return str.equals("true") || str.equals("1") || str.equals("yes") ||
-                    str.equals("on") || str.equals("t") || str.equals("y");
+        if (e instanceof Boolean b)
+            return b;
+        if (e instanceof Number n)
+            return n.doubleValue() != 0.0;
+        if (e instanceof String s) {
+            String str = s.trim().toLowerCase();
+            return str.equals("true") || str.equals("1") || str.equals("yes")
+                    || str.equals("on") || str.equals("t") || str.equals("y");
         }
         return true;
     }
@@ -51,9 +62,7 @@ public interface Expression {
         return b ? 1.0 : 0.0;
     }
 
-    public static final Function<String, ParseResult<Expression>> level0 = Expression::parseLogical;
-
-    public static boolean contains(BinaryOp[] list, BinaryOp value) {
+    public static boolean containsOp(BinaryOp[] list, BinaryOp value) {
         for (BinaryOp item : list) {
             if (value.equals(item))
                 return true;
@@ -61,22 +70,24 @@ public interface Expression {
         return false;
     }
 
-    public static ParseSuccess<Expression> parse_expr_level(
-            String input,
-            Function<String, ParseResult<Expression>> lower_parser,
-            BinaryOp[] ops) throws ParseNomException {
-        ParseSuccess<Expression> result = lower_parser.apply(input).unwrap();
+    // ===================== Parseur générique de niveau =======================
+    public static ParseSuccess<Expression> parseExprLevel(int level, String input) throws ParseNomException {
+        if (level >= LEVELS.length) {
+            return parseFactor0(input);
+        }
+
+        ParseSuccess<Expression> result = parseExprLevel(level + 1, input);
         input = result.remaining();
         Expression current = result.matched();
+
         while (true) {
             if (Tokenizer.codonStop(input))
                 break;
 
             String oldInput = input;
             ParseResult<Token> nextRes = Tokenizer.scanToken(input);
-            if (!(nextRes instanceof ParseSuccess<Token> next)) {
+            if (!(nextRes instanceof ParseSuccess<Token> next))
                 break;
-            }
 
             Token token = next.matched();
             input = next.remaining();
@@ -84,8 +95,8 @@ public interface Expression {
             if (token.status == TokenKind.BINOP) {
                 BinaryOp op = (BinaryOp) token.getValue();
 
-                if (contains(ops, op)) {
-                    ParseSuccess<Expression> rhs = lower_parser.apply(input).unwrap();
+                if (containsOp(LEVELS[level], op)) {
+                    ParseSuccess<Expression> rhs = parseExprLevel(level + 1, input).unwrap();
                     input = rhs.remaining();
                     current = new BinaryExpr(current, op, rhs.matched());
                     continue;
@@ -95,97 +106,36 @@ public interface Expression {
             } else {
                 input = oldInput;
             }
+
             break;
         }
 
         return new ParseSuccess<>(input, current);
     }
 
-    public static ParseResult<Expression> parseLogical(String input) {
-        BinaryOp[] ops = { LogicalOp.OR, LogicalOp.AND };
-        try {
-            return parse_expr_level(input, Expression::parseCompare, ops);
-        } catch (ParseNomException e) {
-            return new ParseError<>(e);
-        }
-    }
-
-    public static ParseResult<Expression> parseCompare(String input) {
-        BinaryOp[] ops = CompareOp.allCompareOp();
-        try {
-            return parse_expr_level(input, Expression::parseAtom, ops);
-        } catch (ParseNomException e) {
-            return new ParseError<>(e);
-        }
-    }
-
-    public static ParseResult<Expression> parseAtom(String input) {
-        BinaryOp[] ops = { ArithmeticOp.ADD, ArithmeticOp.MIN };
-        try {
-            return parse_expr_level(input, Expression::parseTerm, ops);
-        } catch (ParseNomException e) {
-            return new ParseError<>(e);
-        }
-    }
-
-    public static ParseResult<Expression> parseTerm(String input) {
-        BinaryOp[] ops = { ArithmeticOp.MUL, ArithmeticOp.DIV };
-        try {
-            return parse_expr_level(input, Expression.parseFactorFn(), ops);
-        } catch (ParseNomException e) {
-            return new ParseError<>(e);
-        }
-    }
-
+    // ========================= Parseur de facteur ==========================
     public static ParseSuccess<Expression> parseFactor0(String input) throws ParseNomException {
         ParseSuccess<Token> tSuccess = Tokenizer.scanToken(input).unwrap();
         Token t = tSuccess.matched();
-
         String rest = tSuccess.remaining();
 
         return switch (t.status) {
-            case NUMBER -> {
-                yield FactorHelper.handleNumber(t, rest);
-            }
-            case OTHER -> {
-                yield FactorHelper.handleOther(t, rest, input);
-            }
-            case ID -> {
-                yield FactorHelper.handleId(t, rest);
-            }
-            case PREFIXEDOP -> {
-                yield FactorHelper.handlePrefixedOp(t, rest);
-            }
-            case BINOP -> {
-                yield FactorHelper.handleBinOp(t, rest, input);
-            }
-            case NULLVALUE -> {
-                yield new ParseSuccess<>(rest, new PrimitiveExpr(PrimitiveKind.NULLVALUE, null));
-            }
-            case STRING -> {
-                yield  FactorHelper.handleString(t, rest);
-            }
+            case NUMBER -> FactorHelper.handleNumber(t, rest);
+            case OTHER -> FactorHelper.handleOther(t, rest, input);
+            case ID -> FactorHelper.handleId(t, rest);
+            case PREFIXEDOP -> FactorHelper.handlePrefixedOp(t, rest);
+            case BINOP -> FactorHelper.handleBinOp(t, rest, input);
+            case NULLVALUE -> new ParseSuccess<>(rest, new PrimitiveExpr(PrimitiveKind.NULLVALUE, null));
+            case STRING -> FactorHelper.handleString(t, rest);
             default -> throw ParseNomException.buildTokenWrongPlace(t, input);
         };
     }
 
-    public static Function<String, ParseResult<Expression>> parseFactorFn() {
-        return input -> {
-            try {
-                return parseFactor0(input);
-            } catch (ParseNomException e) {
-                return new ParseError<>(e);
-            }
-        };
-    }
-
+   
     public static void main(String[] args) throws ParseNomException {
         String input = "-(1)=0+(-1)";
-        var res = parseLogical(input).unwrap();
+        var res = parseExpression.apply(input).unwrap();
         System.out.println(res.matched());
         System.out.println("Remaining : " + res.remaining());
-        System.out.println("Input : " + input);
-        // System.out.println("error : " + res.getnull+1*3 and 1Message());
-        // System.out.println(res.matched().eval());
     }
 }

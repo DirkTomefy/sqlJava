@@ -71,8 +71,10 @@ public class TestSelection2 {
         Relation relation = new Relation("Personnes", fieldNames, domains, individus);
         System.out.println("" + relation.toString());
         try {
+            String condition="(nom=ville) AND (nom='Marseille' or 'Marseille'=ville) and (((age=18 and 4=1*3+1) and age<=18)) and -1=0.0+(-1)";
+           //String condition="!(nom=ville)";
             System.out.println("" + relation.selection(
-                    "(nom=ville) and (nom='Marseille' or 'Marseille'=ville) and (((age=18 and 4=1*3+1) and age<=18)) and -1=0+(-1)"));
+                    condition));
         } catch (ParseNomException e) {
             e.printStackTrace();
         } catch (EvalErr e) {
