@@ -84,7 +84,7 @@ public class TestSelection {
             }
 
             // Test 3: Sélection combinée
-            String select3="(age < 30 AND ville != 'Paris') and ((1+1=2) or 1!=1)";
+            String select3="( 30 > age AND ville != 'Paris') and ((1+1=2) or 1!=1)";
             System.out.println("\n3. Sélection "+select3);
             Relation result3 = relation.selection(select3);
             System.out.println("Résultat: " + result3.getIndividus().size() + " individus");

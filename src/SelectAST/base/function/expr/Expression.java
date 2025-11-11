@@ -180,7 +180,7 @@ public interface Expression {
     }
 
     public static void main(String[] args) throws ParseNomException {
-        String input = "1 is not 1";
+        String input = "-(1)=0+(-1)";
         var res = parseLogical(input).unwrap();
         System.out.println(res.matched());
         System.out.println("Remaining : " + res.remaining());

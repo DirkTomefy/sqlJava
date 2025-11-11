@@ -43,13 +43,13 @@ public class FactorHelper {
     }
 
     public static ParseSuccess<Expression> handlePrefixedOp(Token t, String rest) throws ParseNomException {
-        ParseSuccess<Expression> exp = Expression.level0.apply(rest).unwrap();
+        ParseSuccess<Expression> exp = Expression.parseFactor0(rest);
         return new ParseSuccess<>(exp.remaining(), new PrefixedExpr((PrefixedOp) t.getValue(), exp.matched()));
     }
 
     public static ParseSuccess<Expression> handleBinOp(Token t,String rest,String input) throws ParseNomException {
         if (ArithmeticOp.MIN.equals(t.value)) {
-            ParseSuccess<Expression> exp = Expression.level0.apply(rest).unwrap();
+            ParseSuccess<Expression> exp = Expression.parseFactor0(rest);
             return new ParseSuccess<>(exp.remaining(), new PrefixedExpr(PrefixedOp.NEG, exp.matched()));
         } else {
             throw new ParseNomException(input, t.value + " can not use as PrefixedOp ");

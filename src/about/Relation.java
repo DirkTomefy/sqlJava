@@ -102,6 +102,10 @@ public class Relation {
         this.supportsWithErr(ind);
         this.individus.add(ind);
     }
+    public void insertNewInd (Vector<Object> ind)  throws DomainOutOfBonds, DomainSupportErr{
+        Individual newInd=new Individual(ind);
+        insertNewInd(newInd);
+    }
 
     public boolean contains(Individual ind) {
         boolean value = false;

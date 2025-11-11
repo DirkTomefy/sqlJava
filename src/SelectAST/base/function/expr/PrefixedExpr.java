@@ -44,6 +44,8 @@ public class PrefixedExpr implements Expression {
     public Object eval(Individual row, Vector<String> fieldName) throws EvalErr {
         Object value = expr.eval(row, fieldName);
         
+        System.out.println(""+expr.toString());
+
         return switch (op) {
             case NOT -> evalNot(value);
             case NEG -> evalNeg(value);
