@@ -2,7 +2,7 @@ package about.util;
 
 import java.util.Vector;
 
-import SelectAST.err.eval.FieldNotFoundErr;
+import RDP.err.eval.FieldNotFoundErr;
 import about.Individual;
 import about.Relation;
 

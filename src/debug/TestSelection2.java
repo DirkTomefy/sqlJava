@@ -2,8 +2,8 @@ package debug;
 
 import java.util.Vector;
 
-import SelectAST.err.EvalErr;
-import SelectAST.err.ParseNomException;
+import RDP.err.EvalErr;
+import RDP.err.ParseNomException;
 import about.Domain;
 import about.Individual;
 import about.Relation;
