@@ -249,7 +249,7 @@ public class Tokenizer {
 
             var result = combinedParser.apply(input).map(list -> String.join("", list));
             if (result instanceof ParseSuccess<String> success) {
-                return mapManyKeyWordToToken(success.matched().replaceAll(" ", ""), success.getInput(), input);
+                return mapManyKeyWordToToken(success.matched().replace(" ", ""), success.getInput(), input);
             } else {
                 return new ParseError<>(new ParseNomException(input, "Keyword expected"));
             }
@@ -269,6 +269,7 @@ public class Tokenizer {
                 tagCompareOp(),
                 tagArithmOp(),
                 tagPrefixedOp());
+        
         return parser.apply(input);
     }
 

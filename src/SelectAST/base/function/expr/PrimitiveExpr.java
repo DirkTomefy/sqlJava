@@ -35,6 +35,9 @@ public class PrimitiveExpr implements Expression {
         return new PrimitiveExpr(PrimitiveKind.STRING, valueString);
     }
 
+    public static PrimitiveExpr nullvalue(){
+        return new PrimitiveExpr(PrimitiveKind.NULLVALUE, null);
+    }
     @Override
     public String toString() {
         return type.toString() + "(" + value + ")";

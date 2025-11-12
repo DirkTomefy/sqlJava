@@ -1,9 +1,12 @@
 package SelectAST.base.function.expr;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.function.Function;
 
 import SelectAST.base.function.expr.helper.FactorHelper;
+import SelectAST.base.function.expr.helper.SpecialBinOpHandler;
 import SelectAST.base.function.operand.BinaryOp;
 import SelectAST.base.function.operand.other.ArithmeticOp;
 import SelectAST.base.function.operand.other.CompareOp;
@@ -13,6 +16,7 @@ import SelectAST.base.function.result.ParseResult;
 import SelectAST.base.function.result.ParseSuccess;
 import SelectAST.err.EvalErr;
 import SelectAST.err.ParseNomException;
+import SelectAST.err.parsing.AfterIsOrIsNotErr;
 import SelectAST.token.Token;
 import SelectAST.token.TokenKind;
 import SelectAST.token.Tokenizer;
@@ -27,6 +31,7 @@ public interface Expression {
             return new ParseError<>(e);
         }
     };
+
     static final BinaryOp[][] LEVELS = {
             { LogicalOp.OR, LogicalOp.AND },
             CompareOp.allCompareOp(),
@@ -34,8 +39,7 @@ public interface Expression {
             { ArithmeticOp.MUL, ArithmeticOp.DIV }
     };
 
-    
-
+    static final Map<BinaryOp, SpecialBinOpHandler> BINOP_HANDLER = initHandler();
 
     public abstract Object eval(Individual row, Vector<String> fieldName) throws EvalErr;
 
@@ -95,6 +99,14 @@ public interface Expression {
             if (token.status == TokenKind.BINOP) {
                 BinaryOp op = (BinaryOp) token.getValue();
 
+                if (BINOP_HANDLER.containsKey(op)) {
+                    SpecialBinOpHandler handler = BINOP_HANDLER.get(op);
+                    ParseSuccess<Expression> special = handler.handle(current, input);
+                    input = special.remaining();
+                    current = special.matched();
+                    continue;
+                }
+
                 if (containsOp(LEVELS[level], op)) {
                     ParseSuccess<Expression> rhs = parseExprLevel(level + 1, input).unwrap();
                     input = rhs.remaining();
@@ -112,6 +124,7 @@ public interface Expression {
 
         return new ParseSuccess<>(input, current);
     }
+
 
     // ========================= Parseur de facteur ==========================
     public static ParseSuccess<Expression> parseFactor0(String input) throws ParseNomException {
@@ -131,9 +144,33 @@ public interface Expression {
         };
     }
 
-   
+    //fonction utilitaire : 
+    private static SpecialBinOpHandler makeHandlerIs_IsNot(CompareOp value) {
+        return (left, input) -> {
+            ParseResult<Token> next = Tokenizer.scanToken(input);
+            if (!(next instanceof ParseSuccess<Token> success)) {
+                throw new AfterIsOrIsNotErr(input);
+            }
+
+            Token t = success.matched();
+            if (t.status != TokenKind.NULLVALUE) {
+                throw new AfterIsOrIsNotErr(input);
+            }
+
+            Expression right = new PrimitiveExpr(PrimitiveKind.NULLVALUE, null);
+            return new ParseSuccess<>(success.remaining(), new BinaryExpr(left, value , right));
+        };
+    }
+
+    private static Map<BinaryOp, SpecialBinOpHandler> initHandler() {
+        Map<BinaryOp, SpecialBinOpHandler> handlers = new HashMap<>();
+        handlers.put(CompareOp.Is, makeHandlerIs_IsNot(CompareOp.Is));
+        handlers.put(CompareOp.IsNot, makeHandlerIs_IsNot(CompareOp.IsNot));
+        return handlers;
+    }
+
     public static void main(String[] args) throws ParseNomException {
-        String input = "-(1)=0+(-1)";
+        String input = "1+1";
         var res = parseExpression.apply(input).unwrap();
         System.out.println(res.matched());
         System.out.println("Remaining : " + res.remaining());
